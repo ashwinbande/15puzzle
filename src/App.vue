@@ -8,7 +8,7 @@
         <div>
           Select Size:
           <select v-model="size" :disabled="!paused">
-            <template v-for="value in [3, 4, 5, 6]">
+            <template v-for="value in [3, 4, 5, 6, 7, 8]">
               <option :key="value" :value="value">{{ value }}</option>
             </template>
           </select>
@@ -36,13 +36,24 @@
           Restart
         </button>
       </div>
-      <puzzle
-        :paused="paused"
-        :size="size"
-        ref="puzzle"
-        @moves="setMoves"
-        @completed="gameCompleted"
-      />
+      <div class="puzzle__main">
+        <puzzle
+          :paused="paused"
+          :size="size"
+          ref="puzzle"
+          @moves="setMoves"
+          @completed="gameCompleted"
+        />
+        <div class="puzzle__solved" v-if="gameComplete || paused">
+          <span v-if="gameComplete">
+            Congratulations! You Solved puzzle in
+            {{ moves }} moves and {{ time }} seconds.
+          </span>
+          <span v-else>
+            Paused
+          </span>
+        </div>
+      </div>
       <div class="puzzle__right">
         <div class="puzzle__score">
           <div>
@@ -78,6 +89,7 @@ export default {
       paused: true,
       gameStarted: false,
       interval: null,
+      gameComplete: false,
     };
   },
   methods: {
@@ -88,6 +100,7 @@ export default {
       clearInterval(this.interval);
       this.gameStarted = false;
       this.paused = true;
+      this.gameComplete = true;
     },
     shuffle() {
       this.$refs.puzzle.shuffle();
@@ -109,12 +122,14 @@ export default {
       this.moves = 0;
       this.time = 0;
       this.gameStarted = true;
+      this.gameComplete = false;
       clearInterval(this.interval);
       this.interval = setInterval(this.propagateTime, 1000);
     },
   },
   watch: {
     size() {
+      this.restart();
       this.gameStarted = false;
     },
   },
@@ -184,6 +199,28 @@ export default {
             span:nth-child(even) {
               text-align: center;
             }
+          }
+        }
+      }
+      .puzzle__main {
+        position: relative;
+        .puzzle__solved {
+          position: absolute;
+          top: 0;
+          left: 0;
+          bottom: 0;
+          right: 0;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-content: center;
+          margin: 6px 0;
+          padding: 20px;
+          background-color: rgba(0, 0, 0, 0.8);
+          border-radius: 6px;
+          span {
+            font-size: 28px;
+            color: #fff;
           }
         }
       }

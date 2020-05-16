@@ -19,7 +19,9 @@
           }"
           @click="move(number)"
         >
-          <span v-if="number === size * size || (paused && !completed)"></span>
+          <span v-if="paused && !completed"></span>
+          <span v-else-if="number === size * size && completed">{{ number }}</span>
+          <span v-else-if="number === size * size && !completed"></span>
           <span v-else>{{ number }}</span>
         </div>
       </template>
@@ -147,17 +149,17 @@ export default {
         display: flex;
         justify-content: center;
         align-items: center;
-        font-size: 32px;
         color: white;
         cursor: pointer;
         user-select: none;
+        font-size: 24px;
         &:not(.empty) {
           box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.5);
         }
         &.correct {
           background-color: #097080;
         }
-        &.empty {
+        &.empty:not(.completed) {
           background-color: transparent;
         }
         &.paused:not(.completed) {
