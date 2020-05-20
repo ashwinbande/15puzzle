@@ -8,7 +8,7 @@
         <div>
           Select Size:
           <select v-model="size" :disabled="!paused">
-            <template v-for="value in [3, 4, 5, 6, 7, 8]">
+            <template v-for="value in [3, 4, 5, 6, 7, 8, 9, 10, 11, 12]">
               <option :key="value" :value="value">{{ value }}</option>
             </template>
           </select>

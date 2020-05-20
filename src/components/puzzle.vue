@@ -14,15 +14,21 @@
           :class="{
             empty: number === size * size,
             correct: number === index + 1,
+            highlighted: size > 6 && highlighted === number,
             paused,
-            completed
+            completed,
           }"
+          :style="{ 'font-size': `${32 - (Math.floor(size * 1.8))}px`}"
           @click="move(number)"
+          @mouseenter="highlighted = number + 1"
+          @mouseleave="highlighted = null"
         >
-          <span v-if="paused && !completed"></span>
-          <span v-else-if="number === size * size && completed">{{ number }}</span>
-          <span v-else-if="number === size * size && !completed"></span>
-          <span v-else>{{ number }}</span>
+          <transition name="tile">
+            <span v-if="paused && !completed"></span>
+            <span v-else-if="number === size * size && completed">{{ number }}</span>
+            <span v-else-if="number === size * size && !completed"></span>
+            <span v-else>{{ number }}</span>
+          </transition>
         </div>
       </template>
     </div>
@@ -46,6 +52,7 @@ export default {
   data() {
     return {
       state: [],
+      highlighted: null,
     };
   },
   computed: {
@@ -64,10 +71,16 @@ export default {
       this.$set(this.state, j, temp);
     },
     shuffle() {
-      const loopSize = Math.floor(Math.random() * 1000) + 1;
+      const loopSize = Math.floor(Math.random() * 1000 * this.size) + 1;
       const keys = ['up', 'dn', 'lt', 'rt'];
+      let pKey = 'up';
       for (let i = 0; i < loopSize; i += 1) {
-        const key = keys[Math.floor(Math.random() * keys.length)];
+        let key = keys[Math.floor(Math.random() * keys.length)];
+        if (key === 'up' && pKey === 'dn') key = 'lt';
+        else if (key === 'dn' && pKey === 'up') key = 'rt';
+        else if (key === 'rt' && pKey === 'lt') key = 'up';
+        else if (key === 'lt' && pKey === 'rt') key = 'dn';
+        pKey = key;
         this.arrow(key, true);
       }
     },
@@ -142,7 +155,7 @@ export default {
       // margin: 6px;
       height: 100%;
       display: grid;
-      grid-gap: 6px;
+      grid-gap: 4px;
       .puzzle__tile {
         background-color: green;
         border-radius: 6px;
@@ -159,6 +172,9 @@ export default {
         &.correct {
           background-color: #097080;
         }
+        &.highlighted {
+          transform: scale(1.1);
+        }
         &.empty:not(.completed) {
           background-color: transparent;
         }
@@ -173,5 +189,12 @@ export default {
       width: 95vw;
       height: 95vw;
     }
+  }
+
+  .tile-enter-active, .tile-leave-active {
+    transition: opacity 5s;
+  }
+  .tile-enter, .tile-leave-to /* .fade-leave-active below version 2.1.8 */ {
+    opacity: 0;
   }
 </style>
